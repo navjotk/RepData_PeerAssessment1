@@ -2,19 +2,51 @@
 
 
 ## Loading and preprocessing the data
-
-
-
+```{r tidy=FALSE}
+healthData<-read.csv("activity.csv") 
+dailyHeathData<-aggregate(steps~date, healthData, sum)
+intervalHealthData<-aggregate(steps~interval, healthData, mean)
+```
 ## What is mean total number of steps taken per day?
-
-
+```{r tidy=FALSE}
+hist(dailyHeathData$steps, breaks=16)
+mean(dailyHeathData$steps)
+median(dailyHeathData$steps)
+```
 
 ## What is the average daily activity pattern?
-
+```{r tidy=FALSE}
+plot(intervalHealthData$interval, intervalHealthData$steps, type='l')
+intervalHealthData[intervalHealthData$steps==max(intervalHealthData$steps),]
+```
 
 
 ## Imputing missing values
+```{r tidy=FALSE}
+nrow(healthData[!is.na(healthData$steps),])
+```
+We now make a copy of the original data set to replace the NAs with the means for every interval(taken across all days), that we had previously calculated.
+```{r tidy=FALSE}
+assign("interpolatedHealthData", healthData)
+for (i in 1:nrow(interpolatedHealthData)) {
+  if(is.na(interpolatedHealthData[i, "steps"]))
+    interpolatedHealthData[i, "steps"]<-intervalHealthData[intervalHealthData$interval==interpolatedHealthData[i, "interval"],]$steps
+}
+```
 
-
+The new graph looks something like this
+```{r tidy=FALSE}
+interpolatedDailyHeathData<-aggregate(steps~date, interpolatedHealthData, sum)
+hist(interpolatedDailyHeathData$steps, breaks=16)
+mean(interpolatedDailyHeathData$steps)
+median(interpolatedDailyHeathData$steps)
+```
+As expected, the mean remains unchanged, but the median becomes the same as the mean.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r tidy=FALSE}
+weekdaysData<-weekdays(as.Date(healthData$date))
+interpolatedHealthData["weekday"]<-weekdaysData
+weekdaysHealthData<-interpolatedHealthData[!(interpolatedHealthData$weekday %in% c('Saturday','Sunday')),]
+weekendsHealthData<-interpolatedHealthData[(interpolatedHealthData$weekday %in% c('Saturday','Sunday')),]
+```
