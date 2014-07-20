@@ -49,4 +49,9 @@ weekdaysData<-weekdays(as.Date(healthData$date))
 interpolatedHealthData["weekday"]<-weekdaysData
 weekdaysHealthData<-interpolatedHealthData[!(interpolatedHealthData$weekday %in% c('Saturday','Sunday')),]
 weekendsHealthData<-interpolatedHealthData[(interpolatedHealthData$weekday %in% c('Saturday','Sunday')),]
+weekdaysIntervalData<-aggregate(steps~interval, weekdaysHealthData, mean)
+weekendsIntervalData<-aggregate(steps~interval, weekendsHealthData, mean)
+
+plot(weekdaysIntervalData$interval, weekdaysIntervalData$steps, type='l')
+plot(weekendsIntervalData$interval, weekendsIntervalData$steps, type='l')
 ```
